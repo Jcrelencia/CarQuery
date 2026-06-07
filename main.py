@@ -1,13 +1,10 @@
 from db import get_connection
 
-# Uncomment these as teammates finish their files
 import vehicle
-# import customer
 import customer
-# import salesperson
-# import sales
+import salesperson
 import sales
-# import reports
+import reports
 
 def main():
     while True:
@@ -107,11 +104,11 @@ def salesperson_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            pass  # replace with: salesperson.add_salesperson()
+            salesperson.add_salesperson()
         elif choice == "2":
-            pass  # replace with: salesperson.update_salesperson()
+            salesperson.update_salesperson()
         elif choice == "3":
-            pass  # replace with: salesperson.list_all_salespersons()
+            salesperson.list_all_salespersons()
         elif choice == "0":
             break
         else:
@@ -148,15 +145,15 @@ def reports_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            pass  # replace with: reports.get_inventory_report_by_lot()
+            reports.get_inventory_report_by_lot()
         elif choice == "2":
-            pass  # replace with: reports.get_sales_report()
+            reports.get_sales_report()
         elif choice == "3":
-            pass  # replace with: reports.list_all_lots()
+            reports.list_all_lots()
         elif choice == "4":
-            pass  # replace with: reports.list_all_conditions()
+            reports.list_all_conditions()
         elif choice == "5":
-            pass  # replace with: reports.list_all_salespersons()
+            salesperson.list_all_salespersons()
         elif choice == "0":
             break
         else:

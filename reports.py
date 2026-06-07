@@ -4,18 +4,15 @@
 from db import get_connection
 
 
-def GetInventoryReportByLot(lot_id=None):
-    """
-    Returns a summary of current unsold inventory grouped by lot.
-    Parameters: lot_id (optional — if omitted, returns all lots)
-    Returns: List of (lot_name, vehicle_count, avg_price, avg_days_in_inventory).
-    """
+def get_inventory_report_by_lot():
+    lot_id = input("Enter lot ID (or blank for all lots): ").strip() or None
+
     conn = None
     try:
         conn = get_connection()
-        cur = conn.cursor()
+        cur  = conn.cursor()
 
-        if lot_id is not None:
+        if lot_id:
             cur.execute(
                 """
                 SELECT
@@ -25,8 +22,7 @@ def GetInventoryReportByLot(lot_id=None):
                     ROUND(AVG(CURRENT_DATE - v.date_acquired), 2) AS avg_days_in_inventory
                 FROM Vehicle v
                 JOIN Lot l ON v.current_lot_id = l.lot_id
-                WHERE v.sold = FALSE
-                  AND v.current_lot_id = %s
+                WHERE v.sold = FALSE AND v.current_lot_id = %s
                 GROUP BY l.lot_id, l.name
                 ORDER BY l.name
                 """,
@@ -49,9 +45,15 @@ def GetInventoryReportByLot(lot_id=None):
             )
 
         rows = cur.fetchall()
-        return rows
+        if not rows:
+            print("No inventory data found.")
+        else:
+            print(f"\n{'Lot':<20} {'Vehicles':<10} {'Avg Price':<15} {'Avg Days'}")
+            print("-" * 60)
+            for row in rows:
+                print(f"{row[0]:<20} {row[1]:<10} ${row[2]:<14} {row[3]}")
     except Exception as e:
-        return f"Failure: {e}"
+        print(f"Error: {e}")
     finally:
         if 'cur' in locals() and cur:
             cur.close()
@@ -59,18 +61,17 @@ def GetInventoryReportByLot(lot_id=None):
             conn.close()
 
 
-def GetSalesReport(date_start, date_end, employee_id=None):
-    """
-    Returns sales performance for the specified period.
-    Parameters: date_start, date_end, employee_id (optional)
-    Returns: List of (employee_id, name, vehicles_sold, total_revenue).
-    """
+def get_sales_report():
+    date_start  = input("Enter start date (YYYY-MM-DD): ").strip()
+    date_end    = input("Enter end date (YYYY-MM-DD): ").strip()
+    employee_id = input("Enter employee ID (or blank for all): ").strip() or None
+
     conn = None
     try:
         conn = get_connection()
-        cur = conn.cursor()
+        cur  = conn.cursor()
 
-        if employee_id is not None:
+        if employee_id:
             cur.execute(
                 """
                 SELECT
@@ -105,9 +106,15 @@ def GetSalesReport(date_start, date_end, employee_id=None):
             )
 
         rows = cur.fetchall()
-        return rows
+        if not rows:
+            print("No sales data found for that period.")
+        else:
+            print(f"\n{'Employee ID':<15} {'Name':<25} {'Sold':<8} {'Revenue'}")
+            print("-" * 65)
+            for row in rows:
+                print(f"{row[0]:<15} {row[1]:<25} {row[2]:<8} ${row[3]}")
     except Exception as e:
-        return f"Failure: {e}"
+        print(f"Error: {e}")
     finally:
         if 'cur' in locals() and cur:
             cur.close()
@@ -115,16 +122,11 @@ def GetSalesReport(date_start, date_end, employee_id=None):
             conn.close()
 
 
-def ListAllLots():
-    """
-    Returns all lots in the system.
-    Parameters: none
-    Returns: List of (lot_id, name, address, city, state).
-    """
+def list_all_lots():
     conn = None
     try:
         conn = get_connection()
-        cur = conn.cursor()
+        cur  = conn.cursor()
         cur.execute(
             """
             SELECT lot_id, name, address, city, state
@@ -133,9 +135,15 @@ def ListAllLots():
             """
         )
         rows = cur.fetchall()
-        return rows
+        if not rows:
+            print("No lots found.")
+        else:
+            print(f"\n{'ID':<6} {'Name':<20} {'Address':<25} {'City':<15} {'State'}")
+            print("-" * 75)
+            for row in rows:
+                print(f"{row[0]:<6} {row[1]:<20} {str(row[2]):<25} {str(row[3]):<15} {row[4]}")
     except Exception as e:
-        return f"Failure: {e}"
+        print(f"Error: {e}")
     finally:
         if 'cur' in locals() and cur:
             cur.close()
@@ -143,16 +151,11 @@ def ListAllLots():
             conn.close()
 
 
-def ListAllConditions():
-    """
-    Returns all valid vehicle condition codes and their descriptions.
-    Parameters: none
-    Returns: List of (condition_code, description).
-    """
+def list_all_conditions():
     conn = None
     try:
         conn = get_connection()
-        cur = conn.cursor()
+        cur  = conn.cursor()
         cur.execute(
             """
             SELECT condition_code, description
@@ -161,9 +164,15 @@ def ListAllConditions():
             """
         )
         rows = cur.fetchall()
-        return rows
+        if not rows:
+            print("No conditions found.")
+        else:
+            print(f"\n{'Code':<15} {'Description'}")
+            print("-" * 50)
+            for row in rows:
+                print(f"{row[0]:<15} {row[1]}")
     except Exception as e:
-        return f"Failure: {e}"
+        print(f"Error: {e}")
     finally:
         if 'cur' in locals() and cur:
             cur.close()
