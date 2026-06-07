@@ -3,8 +3,10 @@ from db import get_connection
 # Uncomment these as teammates finish their files
 import vehicle
 # import customer
+import customer
 # import salesperson
 # import sales
+import sales
 # import reports
 
 def main():
@@ -84,11 +86,11 @@ def customer_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            pass  # replace with: customer.add_customer()
+            customer.add_customer()
         elif choice == "2":
-            pass  # replace with: customer.update_customer()
+            customer.update_customer()
         elif choice == "3":
-            pass  # replace with: customer.get_customer_history()
+            customer.get_customer_history()
         elif choice == "0":
             break
         else:
@@ -125,9 +127,9 @@ def sales_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            pass  # replace with: sales.sell_vehicle_no_trade_in()
+            sales.sell_vehicle_no_trade_in()
         elif choice == "2":
-            pass  # replace with: sales.sell_vehicle_with_trade_in()
+            sales.sell_vehicle_with_trade_in()
         elif choice == "0":
             break
         else:
