@@ -1,10 +1,10 @@
-from db import get_connection
-
 import vehicle
 import customer
 import salesperson
 import sales
 import reports
+from db import close_connection
+
 
 def main():
     while True:
@@ -29,6 +29,7 @@ def main():
             reports_menu()
         elif choice == "0":
             print("Goodbye!")
+            close_connection()
             break
         else:
             print("Invalid option, try again.")
@@ -50,23 +51,23 @@ def vehicle_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            vehicle.add_vehicle()
+            vehicle.add_vehicle_client()
         elif choice == "2":
-            vehicle.update_vehicle_price()
+            vehicle.update_vehicle_price_client()
         elif choice == "3":
-            vehicle.initiate_vehicle_transfer()
+            vehicle.initiate_vehicle_transfer_client()
         elif choice == "4":
-            vehicle.confirm_vehicle_arrival()
+            vehicle.confirm_vehicle_arrival_client()
         elif choice == "5":
-            vehicle.get_vehicle_by_vin()
+            vehicle.get_vehicle_by_vin_client()
         elif choice == "6":
-            vehicle.search_vehicles_by_vin()
+            vehicle.search_vehicles_by_vin_client()
         elif choice == "7":
-            vehicle.get_price_history()
+            vehicle.get_price_history_client()
         elif choice == "8":
-            vehicle.search_vehicles()
+            vehicle.search_vehicles_client()
         elif choice == "9":
-            vehicle.get_slow_moving_vehicles()
+            vehicle.get_slow_moving_vehicles_client()
         elif choice == "0":
             break
         else:
@@ -83,11 +84,11 @@ def customer_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            customer.add_customer()
+            customer.add_customer_client()
         elif choice == "2":
-            customer.update_customer()
+            customer.update_customer_client()
         elif choice == "3":
-            customer.get_customer_history()
+            customer.get_customer_history_client()
         elif choice == "0":
             break
         else:
@@ -104,11 +105,11 @@ def salesperson_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            salesperson.add_salesperson()
+            salesperson.add_salesperson_client()
         elif choice == "2":
-            salesperson.update_salesperson()
+            salesperson.update_salesperson_client()
         elif choice == "3":
-            salesperson.list_all_salespersons()
+            salesperson.list_all_salespersons_client()
         elif choice == "0":
             break
         else:
@@ -124,9 +125,9 @@ def sales_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            sales.sell_vehicle_no_trade_in()
+            sales.sell_vehicle_no_trade_in_client()
         elif choice == "2":
-            sales.sell_vehicle_with_trade_in()
+            sales.sell_vehicle_with_trade_in_client()
         elif choice == "0":
             break
         else:
@@ -145,15 +146,15 @@ def reports_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            reports.get_inventory_report_by_lot()
+            reports.get_inventory_report_by_lot_client()
         elif choice == "2":
-            reports.get_sales_report()
+            reports.get_sales_report_client()
         elif choice == "3":
-            reports.list_all_lots()
+            reports.list_all_lots_client()
         elif choice == "4":
-            reports.list_all_conditions()
+            reports.list_all_conditions_client()
         elif choice == "5":
-            salesperson.list_all_salespersons()
+            salesperson.list_all_salespersons_client()
         elif choice == "0":
             break
         else:
