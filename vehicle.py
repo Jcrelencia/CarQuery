@@ -7,6 +7,7 @@ from db import get_connection
 # ─────────────────────────────────────────
 
 def add_vehicle(vin, make, model, year, mileage, color, condition_code, lot_id, asking_price):
+    conn = None
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -20,11 +21,13 @@ def add_vehicle(vin, make, model, year, mileage, color, condition_code, lot_id, 
         conn.commit()
         return "Vehicle added successfully."
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
         return f"Error: {e}"
 
 
 def update_vehicle_price(vin, new_price, employee_id):
+    conn = None
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -52,11 +55,13 @@ def update_vehicle_price(vin, new_price, employee_id):
         conn.commit()
         return "Vehicle price updated and price history recorded."
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
         return f"Error: {e}"
 
 
 def initiate_vehicle_transfer(vin, to_lot_id):
+    conn = None
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -78,17 +83,19 @@ def initiate_vehicle_transfer(vin, to_lot_id):
         conn.commit()
         return "Vehicle transfer initiated."
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
         return f"Error: {e}"
 
 
 def confirm_vehicle_arrival(vin):
+    conn = None
     try:
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("""
             SELECT vehicle_id FROM Vehicle
-            WHERE vin = %s AND location_status = 'InTransit' LIMIT 1
+            WHERE vin = %s AND location_status = 'InTransit' AND sold = FALSE LIMIT 1
         """, (vin,))
         row = cur.fetchone()
         if not row:
@@ -114,7 +121,8 @@ def confirm_vehicle_arrival(vin):
         conn.commit()
         return "Vehicle arrival confirmed."
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
         return f"Error: {e}"
 
 
@@ -141,13 +149,14 @@ def search_vehicles_by_vin(vin):
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("""
-            SELECT v.vehicle_id, v.vin, v.make, v.model, v.year,
-                   l.name, v.location_status, v.current_asking_price,
-                   CURRENT_DATE - v.date_acquired AS days_in_inventory
-            FROM Vehicle v
-            JOIN Lot l ON v.current_lot_id = l.lot_id
-            WHERE v.vin = %s
-        """, (vin,))
+    SELECT v.vehicle_id, v.vin, v.make, v.model, v.year,
+           l.name, v.location_status, v.current_asking_price,
+           CURRENT_DATE - v.date_acquired AS days_in_inventory,
+           v.sold
+    FROM Vehicle v
+    JOIN Lot l ON v.current_lot_id = l.lot_id
+    WHERE v.vin = %s
+""", (vin,))
         return cur.fetchall()
     except Exception as e:
         return f"Error: {e}"
@@ -184,22 +193,22 @@ def search_vehicles(make=None, model=None, year_min=None, year_max=None,
         if model:
             filters.append("v.model ILIKE %s")
             values.append(f"%{model}%")
-        if year_min:
+        if year_min is not None:
             filters.append("v.year >= %s")
             values.append(year_min)
-        if year_max:
+        if year_max is not None:
             filters.append("v.year <= %s")
             values.append(year_max)
-        if price_min:
+        if price_min is not None:
             filters.append("v.current_asking_price >= %s")
             values.append(price_min)
-        if price_max:
+        if price_max is not None:
             filters.append("v.current_asking_price <= %s")
             values.append(price_max)
-        if mileage_max:
+        if mileage_max is not None:
             filters.append("v.mileage <= %s")
             values.append(mileage_max)
-        if lot_id:
+        if lot_id is not None:
             filters.append("v.current_lot_id = %s")
             values.append(lot_id)
         cur.execute(f"""
@@ -305,7 +314,8 @@ def search_vehicles_by_vin_client():
         print(f"\n{'ID':<6} {'VIN':<18} {'Make':<12} {'Model':<12} {'Year':<6} {'Lot':<15} {'Status':<12} {'Price':<12} {'Days'}")
         print("-" * 100)
         for r in rows:
-            print(f"{r[0]:<6} {r[1]:<18} {r[2]:<12} {r[3]:<12} {r[4]:<6} {r[5]:<15} {r[6]:<12} ${r[7]:<11} {r[8]}")
+            status = ("Sold+Transit" if r[6] == "InTransit" else "Sold") if r[9] else r[6]
+            print(f"{r[0]:<6} {r[1]:<18} {r[2]:<12} {r[3]:<12} {r[4]:<6} {r[5]:<15} {status:<12} ${r[7]:<11} {r[8]}")
 
 
 def get_price_history_client():
@@ -346,6 +356,11 @@ def search_vehicles_client():
 
 def get_slow_moving_vehicles_client():
     days = input("Enter days threshold (e.g. 90): ").strip()
+    try:
+        days = int(days)
+    except ValueError:
+        print("Invalid input: please enter a whole number.")
+        return
     rows = get_slow_moving_vehicles(days)
     if isinstance(rows, str):
         print(rows)
